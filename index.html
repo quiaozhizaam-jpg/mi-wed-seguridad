@@ -3,143 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL DE ANÁLISIS VIVIENTE</title>
+    <title>SISTEMA DE ANÁLISIS | [ANONIMOUS SEGURITY]</title>
     <style>
         :root {
-            --green: #00ff41;
-            --bg: #050505;
+            --neon-green: #00ff41;
+            --dark-bg: #0a0a0a;
+            --danger: #ff3e3e;
         }
         body {
-            background-color: var(--bg);
-            color: var(--green);
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
+            padding: 40px;
+            line-height: 1.6;
         }
         .terminal {
+            max-width: 800px;
             width: 100%;
-            max-width: 900px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid var(--green);
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            border: 1px solid var(--neon-green);
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
             border-radius: 5px;
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
+            background: rgba(0, 0, 0, 0.95);
         }
-        .header {
-            border-bottom: 1px solid var(--green);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        #log-container {
-            flex-grow: 1;
-            overflow-y: hidden; /* Efecto de terminal vieja */
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .line { margin-bottom: 4px; }
-        .success { color: #fff; }
-        .danger { color: #ff3e3e; font-weight: bold; }
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 18px;
-            background: var(--green);
-            animation: blink 0.8s infinite;
-            vertical-align: middle;
-        }
+        h1 { font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid var(--neon-green); padding-bottom: 10px; }
+        .secure-badge { background: var(--neon-green); color: black; padding: 2px 8px; font-weight: bold; margin-right: 10px; }
+        #consola-live { white-space: pre-wrap; color: #fff; margin-top: 15px; font-size: 0.9rem; }
+        .final-msg { color: var(--neon-green); font-weight: bold; text-transform: uppercase; margin-top: 10px; display: block; }
+        .cursor { animation: blink 1s infinite; font-weight: bold; background: var(--neon-green); color: var(--neon-green); }
         @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-<div class="terminal">
-    <div class="header">
-        [ SYSTEM ANALYSIS NODE: LINUX_MINT_USER ] <br>
-        [ STATUS: MONITORING LIVE TRAFFIC ]
+    <div class="terminal">
+        <h1><span class="secure-badge">ESTADO: ACTIVO</span> ANÁLISIS DE SISTEMAS</h1>
+        
+        <p>> Cargando protocolos de seguridad en Linux Mint...</p>
+        <p>> Usuario: Analista_Junior | Nivel: Acceso Total</p>
+
+        <hr style="border: 0.5px solid var(--neon-green); margin-top: 20px;">
+        
+        <div id="consola-live"></div>
+        <span id="final-box"></span><span class="cursor">_</span>
     </div>
-    
-    <div id="log-container">
-        <!-- Aquí aparecerán los comandos solos -->
-    </div>
-    
-    <div class="input-line">
-        <span>root@analista:~# </span><span id="typing"></span><span class="cursor"></span>
-    </div>
-</div>
 
-<script>
-    const container = document.getElementById('log-container');
-    const typingSpan = document.getElementById('typing');
+    <script>
+        const consola = document.getElementById('consola-live');
+        const finalBox = document.getElementById('final-box');
+        
+        const lineas = [
+            " > [INFO] Iniciando escaneo de red...",
+            " > [OK] Verificando firewalls y puertos abiertos...",
+            " > [INFO] Analizando tráfico entrante en Linux Mint...",
+            " > [OK] No se detectan intrusiones externas.",
+            " > [INFO] Comprobando integridad del Kernel...",
+            " > [OK] Seguridad del núcleo verificada.",
+            " > [INFO] Limpiando rastros de conexiones temporales..."
+        ];
 
-    // Lista de comandos y logs que se verán ejecutándose
-    const logs = [
-        "> Iniciando escaneo de puertos con Nmap...",
-        "> [OK] Puerto 80 (HTTP) cerrado.",
-        "> [OK] Puerto 443 (HTTPS) activo y cifrado.",
-        "> Analizando archivos de log en /var/log/auth.log",
-        "> ALERTA: Intento de inicio de sesión fallido desde IP 192.168.1.45",
-        "> Bloqueando dirección IP sospechosa... [HECHO]",
-        "> Verificando integridad del Kernel de Linux Mint...",
-        "> Comprobando rootkits con chkrootkit... 0 detectados.",
-        "> Analizando tráfico entrante... 128kbps",
-        "> Ejecutando Lynis: Puntuación de endurecimiento actual: 78/100",
-        "> Actualizando base de datos de firmas de virus (ClamAV)...",
-        "> [INFO] El sistema está operando en condiciones normales."
-    ];
+        const mensajeFinal = " > Protocolo de seguridad finalizada perímetro sin trakeo de información";
 
-    let logIndex = 0;
+        let lineaIdx = 0;
+        let charIdx = 0;
 
-    function addLog() {
-        if (logIndex < logs.length) {
-            const newLine = document.createElement('div');
-            newLine.className = 'line';
-            
-            // Si el mensaje es de alerta, ponerlo en rojo
-            if (logs[logIndex].includes("ALERTA")) {
-                newLine.classList.add('danger');
-            } else if (logs[logIndex].includes("OK")) {
-                newLine.classList.add('success');
+        function escribirLineas() {
+            if (lineaIdx < lineas.length) {
+                let currentLine = lineas[lineaIdx];
+                if (charIdx < currentLine.length) {
+                    consola.innerHTML += currentLine.charAt(charIdx);
+                    charIdx++;
+                    setTimeout(escribirLineas, 30);
+                } else {
+                    consola.innerHTML += "<br>";
+                    charIdx = 0;
+                    lineaIdx++;
+                    setTimeout(escribirLineas, 600);
+                }
+            } else {
+                escribirFinal();
             }
-
-            newLine.textContent = logs[logIndex];
-            container.appendChild(newLine);
-            
-            // Mantener el scroll abajo
-            container.scrollTop = container.scrollHeight;
-            
-            logIndex++;
-            
-            // Si llega al final, vuelve a empezar para que nunca se detenga
-            if (logIndex === logs.length) logIndex = 0;
-
-            // Esperar un tiempo aleatorio para que parezca real
-            setTimeout(addLog, Math.random() * 2000 + 500);
         }
-    }
 
-    // Efecto de escribir en la línea de comando
-    let cmdText = "sudo analyzer --live-scan --verbose";
-    let charIndex = 0;
-
-    function typeCommand() {
-        if (charIndex < cmdText.length) {
-            typingSpan.textContent += cmdText.charAt(charIndex);
-            charIndex++;
-            setTimeout(typeCommand, 100);
-        } else {
-            // Cuando termina de escribir el comando, empiezan los logs
-            setTimeout(addLog, 1000);
+        let finalCharIdx = 0;
+        function escribirFinal() {
+            if (finalCharIdx < mensajeFinal.length) {
+                finalBox.innerHTML += mensajeFinal.charAt(finalCharIdx);
+                finalBox.className = "final-msg";
+                finalCharIdx++;
+                setTimeout(escribirFinal, 50);
+            }
         }
-    }
 
-    window.onload = typeCommand;
-</script>
-
+        window.onload = escribirLineas;
+    </script>
 </body>
 </html>
