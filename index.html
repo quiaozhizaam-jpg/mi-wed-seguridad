@@ -3,63 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA DE ANÁLISIS | [Tu Nombre]</title>
+    <title>TERMINAL DE ANÁLISIS VIVIENTE</title>
     <style>
         :root {
-            --neon-green: #00ff41;
-            --dark-bg: #0a0a0a;
-            --danger: #ff3e3e;
+            --green: #00ff41;
+            --bg: #050505;
         }
         body {
-            background-color: var(--dark-bg);
-            color: var(--neon-green);
-            font-family: 'Courier New', monospace;
+            background-color: var(--bg);
+            color: var(--green);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
-            padding: 40px;
-            line-height: 1.6;
         }
         .terminal {
-            max-width: 800px;
-            border: 1px solid var(--neon-green);
-            padding: 25px;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
-            border-radius: 5px;
+            width: 100%;
+            max-width: 900px;
             background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--green);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            border-radius: 5px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
-        h1 { font-size: 1.5rem; text-transform: uppercase; border-bottom: 2px solid var(--neon-green); }
-        .secure-badge {
-            background: var(--neon-green);
-            color: black;
-            padding: 3px 8px;
+        .header {
+            border-bottom: 1px solid var(--green);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
-            font-size: 0.8rem;
         }
-        .warning { color: var(--danger); font-weight: bold; }
-        .cmd { color: #fff; }
-        .cursor { animation: blink 1s infinite; }
+        #log-container {
+            flex-grow: 1;
+            overflow-y: hidden; /* Efecto de terminal vieja */
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .line { margin-bottom: 4px; }
+        .success { color: #fff; }
+        .danger { color: #ff3e3e; font-weight: bold; }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--green);
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+        }
         @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
-    <div class="terminal">
-        <h1><span class="secure-badge">SECURE_NODE</span> ANÁLISIS DE SISTEMAS v1.0</h1>
-        <p>> Cargando bitácora de seguridad... [OK]</p>
-        
-        <h3>¿Cómo saber si te están hackeando?</h3>
-        <p>Como estudiante de informática, mi primer análisis en Linux Mint detecta estas señales de alerta:</p>
-        <ul>
-            <li><span class="warning">!</span> <strong>Uso de CPU inusual:</strong> Procesos ocultos consumiendo recursos.</li>
-            <li><span class="warning">!</span> <strong>Conexiones extrañas:</strong> IPs desconocidas en el puerto 443 o 80.</li>
-            <li><span class="warning">!</span> <strong>Logs alterados:</strong> Archivos de sistema modificados recientemente.</li>
-        </ul>
 
-        <h3>Comandos de Escaneo Rápido:</h3>
-        <p class="cmd"># Verificar conexiones: <code>ss -tulnp</code></p>
-        <p class="cmd"># Auditoría de sistema: <code>sudo lynis audit system</code></p>
-
-        <hr style="border: 0.5px solid var(--neon-green);">
-        <p>ESTADO: <span style="color: #fff;">MONITOREANDO</span> <span class="cursor">_</span></p>
+<div class="terminal">
+    <div class="header">
+        [ SYSTEM ANALYSIS NODE: LINUX_MINT_USER ] <br>
+        [ STATUS: MONITORING LIVE TRAFFIC ]
     </div>
+    
+    <div id="log-container">
+        <!-- Aquí aparecerán los comandos solos -->
+    </div>
+    
+    <div class="input-line">
+        <span>root@analista:~# </span><span id="typing"></span><span class="cursor"></span>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('log-container');
+    const typingSpan = document.getElementById('typing');
+
+    // Lista de comandos y logs que se verán ejecutándose
+    const logs = [
+        "> Iniciando escaneo de puertos con Nmap...",
+        "> [OK] Puerto 80 (HTTP) cerrado.",
+        "> [OK] Puerto 443 (HTTPS) activo y cifrado.",
+        "> Analizando archivos de log en /var/log/auth.log",
+        "> ALERTA: Intento de inicio de sesión fallido desde IP 192.168.1.45",
+        "> Bloqueando dirección IP sospechosa... [HECHO]",
+        "> Verificando integridad del Kernel de Linux Mint...",
+        "> Comprobando rootkits con chkrootkit... 0 detectados.",
+        "> Analizando tráfico entrante... 128kbps",
+        "> Ejecutando Lynis: Puntuación de endurecimiento actual: 78/100",
+        "> Actualizando base de datos de firmas de virus (ClamAV)...",
+        "> [INFO] El sistema está operando en condiciones normales."
+    ];
+
+    let logIndex = 0;
+
+    function addLog() {
+        if (logIndex < logs.length) {
+            const newLine = document.createElement('div');
+            newLine.className = 'line';
+            
+            // Si el mensaje es de alerta, ponerlo en rojo
+            if (logs[logIndex].includes("ALERTA")) {
+                newLine.classList.add('danger');
+            } else if (logs[logIndex].includes("OK")) {
+                newLine.classList.add('success');
+            }
+
+            newLine.textContent = logs[logIndex];
+            container.appendChild(newLine);
+            
+            // Mantener el scroll abajo
+            container.scrollTop = container.scrollHeight;
+            
+            logIndex++;
+            
+            // Si llega al final, vuelve a empezar para que nunca se detenga
+            if (logIndex === logs.length) logIndex = 0;
+
+            // Esperar un tiempo aleatorio para que parezca real
+            setTimeout(addLog, Math.random() * 2000 + 500);
+        }
+    }
+
+    // Efecto de escribir en la línea de comando
+    let cmdText = "sudo analyzer --live-scan --verbose";
+    let charIndex = 0;
+
+    function typeCommand() {
+        if (charIndex < cmdText.length) {
+            typingSpan.textContent += cmdText.charAt(charIndex);
+            charIndex++;
+            setTimeout(typeCommand, 100);
+        } else {
+            // Cuando termina de escribir el comando, empiezan los logs
+            setTimeout(addLog, 1000);
+        }
+    }
+
+    window.onload = typeCommand;
+</script>
+
 </body>
 </html>
